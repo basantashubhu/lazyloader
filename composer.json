@@ -1,0 +1,21 @@
+{
+    "name": "basanta/lazyloader",
+    "description": "Lazy load Laravel Models with or without relationship.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Basanta\\Lazyloader\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "basantashubhu",
+            "email": "basanta@systha.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=8.1"
+    }
+}
