@@ -12,13 +12,13 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Basanta\\Lazyloader\\": "src/"
+            "Basanta\\LazyLoader\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "aliases": {
-                "LazyLoader": "Basanta\\Lazyloader\\LazyLoader"
+                "LazyLoader": "Basanta\\LazyLoader\\LazyLoader"
             }
         }
     },
