@@ -2,6 +2,10 @@
 
 Lazy load Laravel Models with or without relationship.
 
+```
+use Basanta\LazyLoader\LazyLoader;
+```
+
 Has Many :
 ```PHP
 $usersWithClients = LazyLoader::make($users)->load(Client::class, 'clients')
