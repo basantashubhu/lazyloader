@@ -15,6 +15,13 @@
             "Basanta\\Lazyloader\\": "src/"
         }
     },
+    "extra": {
+        "laravel": {
+            "aliases": {
+                "LazyLoader": "Basanta\\Lazyloader\\LazyLoader"
+            }
+        }
+    },
     "authors": [
         {
             "name": "basantashubhu",
