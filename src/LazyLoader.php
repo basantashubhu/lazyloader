@@ -11,7 +11,7 @@ class LazyLoader
 {
     private string $class;
     private ?string $relationAs;
-    private $keys;
+    private $keys = [];
     private $query;
     private $wheres = [];
     private $filter;
@@ -31,10 +31,23 @@ class LazyLoader
         $this->relationAs = $relationAs ?: Str::snake(basename($class));
         return $this;
     }
-    
-    public function on(array $keys)
+
+    private function parseKey($keys)
     {
-        $this->keys = $keys;
+        if(count($keys) == 1) {
+            return [$keys[0], $keys[0]];
+        }
+        return $keys;
+    }
+    
+    public function on($keys)
+    {
+        if(is_array($keys) && Arr::isAssoc($keys)) {
+            $this->keys = array_merge($this->keys, $keys);
+        } elseif(is_string($keys)) {
+            list($key, $relatedKey) = $this->parseKey(func_get_args());
+            $this->keys[$key] = $relatedKey;
+        }
         return $this;
     }
 
