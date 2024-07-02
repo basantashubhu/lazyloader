@@ -40,13 +40,21 @@ class LazyLoader
         return $keys;
     }
     
-    public function on($keys)
+    /**
+     * Set the where clause to be used for the relationship.
+     * 
+     * @param string|array $keys
+     * @param null|string $relatedKey
+     * @return $this
+     */
+    public function on($keys, $relatedKey = null)
     {
         if(is_array($keys) && Arr::isAssoc($keys)) {
             $this->keys = array_merge($this->keys, $keys);
-        } elseif(is_string($keys)) {
-            list($key, $relatedKey) = $this->parseKey(func_get_args());
-            $this->keys[$key] = $relatedKey;
+        } elseif(is_string($keys) && is_null($relatedKey)) {
+            $this->keys[$keys] = $keys;
+        } elseif(is_string($keys) && is_string($relatedKey)) {
+            $this->keys[$keys] = $relatedKey;
         }
         return $this;
     }
