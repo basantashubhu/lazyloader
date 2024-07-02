@@ -1,6 +1,13 @@
 {
     "name": "basanta/lazyloader",
     "description": "Lazy load Laravel Models with or without relationship.",
+    "keywords": [
+        "laravel",
+        "eloquent",
+        "relationship",
+        "lazy load"
+    ],
+    "homepage": "https://github.com/basantashubhu/lazyloader",
     "type": "library",
     "license": "MIT",
     "autoload": {
@@ -16,6 +23,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": ">=8.1"
+        "php": ">=8.1",
+        "laravel/framework": "^10.0"
     }
 }
