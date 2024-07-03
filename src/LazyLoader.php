@@ -14,6 +14,7 @@ class LazyLoader
     private $keys = [];
     private $query;
     private $wheres = [];
+    private $applies = [];
     private $filter;
 
     public function __construct(
@@ -55,6 +56,14 @@ class LazyLoader
             $this->keys[$keys] = $keys;
         } elseif(is_string($keys) && is_string($relatedKey)) {
             $this->keys[$keys] = $relatedKey;
+        }
+        return $this;
+    }
+
+    public function __call($name, $arguments)
+    {
+        if(!method_exists($this, $name)) {
+            $this->applies[] = [$name, $arguments];
         }
         return $this;
     }
@@ -101,13 +110,21 @@ class LazyLoader
         $this->query = $query;
     }
 
+    private function applyChanges()
+    {
+        foreach($this->wheres as $wheres) {
+            $this->query->where(...$wheres);
+        }
+        foreach($this->applies as $apply) {
+            $this->query->{$apply[0]}(...$apply[1]);
+        }
+    }
+
     private function fetch($fields, $whereFunc)
     {
         $this->createQuery();
         $fetchEligible = strcasecmp(to_sql($this->query, false), to_sql($this->class::query(), false)) != 0;
-        foreach($this->wheres as $wheres) {
-            $this->query->where(...$wheres);
-        }
+        $this->applyChanges();
         $results = !$fetchEligible ? collect([]) : $this->query->get(array_merge($fields, array_keys($this->keys)));
         return $this->collection->map(function($model)use($results, $whereFunc) {
             if(isset($this->filter)) {
