@@ -12,6 +12,7 @@ class LazyLoader
     private string $class;
     private ?string $relationAs;
     private $keys = [];
+    private $dump = false;
     private $query;
     private $wheres = [];
     private $applies = [];
@@ -74,6 +75,12 @@ class LazyLoader
         return $this;
     }
 
+    public function dump()
+    {
+        $this->dump = true;
+        return $this;
+    }
+
     private function createQuery()
     {
         $query = $this->class::query();
@@ -120,11 +127,26 @@ class LazyLoader
         }
     }
 
+    public function toSql($builder): string
+    {
+        $sql = $builder->toSql();
+        $attributes = $builder->getBindings();
+    
+        foreach ($attributes as $value) {
+            $value = is_numeric($value) ? $value : "'{$value}'";
+            $sql = preg_replace('/\?/', $value, $sql, 1);
+        }
+        return $sql;
+    }
+
     private function fetch($fields, $whereFunc)
     {
         $this->createQuery();
-        $fetchEligible = strcasecmp(to_sql($this->query, false), to_sql($this->class::query(), false)) != 0;
+        $fetchEligible = strcasecmp($this->toSql($this->query), $this->toSql($this->class::query())) != 0;
         $this->applyChanges();
+        if($this->dump) {
+            dd($this->toSql($this->query));
+        }
         $results = !$fetchEligible ? collect([]) : $this->query->get(array_merge($fields, array_keys($this->keys)));
         return $this->collection->map(function($model)use($results, $whereFunc) {
             if(isset($this->filter)) {
