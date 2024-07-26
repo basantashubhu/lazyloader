@@ -145,7 +145,7 @@ class LazyLoader
         $fetchEligible = strcasecmp($this->toSql($this->query), $this->toSql($this->class::query())) != 0;
         $this->applyChanges();
         if($this->dump) {
-            dd($this->toSql($this->query));
+            dd($this->toSql($this->query->select(array_merge($fields, array_keys($this->keys)))));
         }
         $results = !$fetchEligible ? collect([]) : $this->query->get(array_merge($fields, array_keys($this->keys)));
         return $this->collection->map(function($model)use($results, $whereFunc) {
