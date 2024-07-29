@@ -11,5 +11,8 @@ class LazyLoaderServiceProvider extends ServiceProvider
         Collection::macro('lazyLoad', function() {
             return LazyLoader::make($this)->load(...func_get_args());
         });
+        Collection::macro('lazyload', function() {
+            return LazyLoader::make($this)->load(...func_get_args());
+        });
     }
 }
