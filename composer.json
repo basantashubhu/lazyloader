@@ -17,6 +17,9 @@
     },
     "extra": {
         "laravel": {
+            "providers": [
+                "Basanta\\LazyLoader\\LazyLoaderServiceProvider"
+            ],
             "aliases": {
                 "LazyLoader": "Basanta\\LazyLoader\\LazyLoader"
             }
@@ -31,6 +34,6 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=8.1",
-        "laravel/framework": "^10.0"
+        "laravel/framework": ">=10.0"
     }
 }
