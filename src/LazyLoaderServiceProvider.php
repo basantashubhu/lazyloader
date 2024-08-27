@@ -8,11 +8,11 @@ class LazyLoaderServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        Collection::macro('lazyLoad', function() {
-            return LazyLoader::make($this)->load(...func_get_args());
+        Collection::macro('lazyLoad', function($related, $relationAlias) {
+            return LazyLoader::make($this)->load($related, $relationAlias);
         });
-        Collection::macro('lazyload', function() {
-            return LazyLoader::make($this)->load(...func_get_args());
+        Collection::macro('lazyload', function($related, $relationAlias) {
+            return LazyLoader::make($this)->load($related, $relationAlias);
         });
     }
 }
