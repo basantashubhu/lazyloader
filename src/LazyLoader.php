@@ -84,36 +84,38 @@ class LazyLoader
     private function createQuery()
     {
         $query = $this->class::query();
-        foreach($this->collection as $i => $model) {
-            if(isset($this->filter)) {
-                $filter = $this->filter;
-                if(!$filter($model, false)) {
+        $query->where(function($query) {
+            foreach($this->collection as $i => $model) {
+                if(isset($this->filter)) {
+                    $filter = $this->filter;
+                    if(!$filter($model, false)) {
+                        continue;
+                    }
+                }
+                foreach($this->keys as $relatedKey => $key) {
+                    if(is_array($key)) {
+                        $in[$i][$relatedKey] = array_map(fn($k) => $k instanceof Expression ? $k : Arr::get($model, $k), $key);
+                        continue;
+                    }
+                    if($key instanceof Expression) {
+                        $in[$i][$relatedKey] = $key;
+                        continue;
+                    }
+                    $in[$i][$relatedKey] = Arr::get($model, $key);
+                }
+                $wh = $in[$i];
+                $fl = array_filter($in[$i], fn($v) => is_array($v) ? !empty(array_filter($v, fn($v1) => $v1 instanceof Expression ? false : $v1)) : !empty($v));
+                if(empty($fl)) {
                     continue;
                 }
+                $query->orWhere(function($query) use($wh) {
+                    foreach($wh as $key => $value) {
+                        $whereFunc = is_array($value) ? 'whereIn' : 'where';
+                        $query->$whereFunc($key, $value);
+                    }
+                });
             }
-            foreach($this->keys as $relatedKey => $key) {
-                if(is_array($key)) {
-                    $in[$i][$relatedKey] = array_map(fn($k) => $k instanceof Expression ? $k : Arr::get($model, $k), $key);
-                    continue;
-                }
-                if($key instanceof Expression) {
-                    $in[$i][$relatedKey] = $key;
-                    continue;
-                }
-                $in[$i][$relatedKey] = Arr::get($model, $key);
-            }
-            $wh = $in[$i];
-            $fl = array_filter($in[$i], fn($v) => is_array($v) ? !empty(array_filter($v, fn($v1) => $v1 instanceof Expression ? false : $v1)) : !empty($v));
-            if(empty($fl)) {
-                continue;
-            }
-            $query->orWhere(function($query) use($wh) {
-                foreach($wh as $key => $value) {
-                    $whereFunc = is_array($value) ? 'whereIn' : 'where';
-                    $query->$whereFunc($key, $value);
-                }
-            });
-        }
+        });
         $this->query = $query;
     }
 
