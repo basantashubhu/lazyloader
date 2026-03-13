@@ -201,9 +201,8 @@ class LazyLoader
         return $this->fetch($fields, 'firstWhere');
     }
 
-    public function multi($fields = ['*'], $array = true)
+    public function multi($fields = ['*'])
     {
-        $this->asArray($array);
         return $this->fetch($fields, 'where');
     }
 }
