@@ -13,6 +13,7 @@ class LazyLoader
     private ?string $relationAs;
     private $keys = [];
     private $dump = false;
+    private $asArray = true;
     private $query;
     private $wheres = [];
     private $applies = [];
@@ -32,6 +33,11 @@ class LazyLoader
         $this->class = $class;
         $this->relationAs = $relationAs ?: Str::snake(basename($class));
         return $this;
+    }
+
+    public function asArray(bool $array)
+    {
+        $this->asArray = $array;
     }
 
     private function parseKey($keys)
@@ -179,7 +185,7 @@ class LazyLoader
                 }
                 return true;
             });
-            $model[$this->relationAs] = $related?->toArray();
+            $model[$this->relationAs] = $this->asArray ? $related?->toArray() : $related;
             return $model;
         });
     }
@@ -195,8 +201,9 @@ class LazyLoader
         return $this->fetch($fields, 'firstWhere');
     }
 
-    public function multi($fields = ['*'])
+    public function multi($fields = ['*'], $array = true)
     {
+        $this->asArray($array);
         return $this->fetch($fields, 'where');
     }
 }
