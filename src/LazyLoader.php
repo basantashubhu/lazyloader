@@ -38,6 +38,7 @@ class LazyLoader
     public function asArray(bool $array)
     {
         $this->asArray = $array;
+        return $this;
     }
 
     private function parseKey($keys)
