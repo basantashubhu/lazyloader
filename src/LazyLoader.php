@@ -101,14 +101,14 @@ class LazyLoader
                 }
                 foreach($this->keys as $relatedKey => $key) {
                     if(is_array($key)) {
-                        $in[$i][$relatedKey] = array_map(fn($k) => $k instanceof Expression ? $k : Arr::get($model, $k), $key);
+                        $in[$i][$relatedKey] = array_map(fn($k) => $k instanceof Expression ? $k : data_get($model, $k), $key);
                         continue;
                     }
                     if($key instanceof Expression) {
                         $in[$i][$relatedKey] = $key;
                         continue;
                     }
-                    $in[$i][$relatedKey] = Arr::get($model, $key);
+                    $in[$i][$relatedKey] = data_get($model, $key);
                 }
                 $wh = $in[$i];
                 $fl = array_filter($in[$i], fn($v) => is_array($v) ? !empty(array_filter($v, fn($v1) => $v1 instanceof Expression ? false : $v1)) : !empty($v));
@@ -161,14 +161,22 @@ class LazyLoader
             if(isset($this->filter)) {
                 $filter = $this->filter;
                 if(!$filter($model, true)) {
-                    $model[$this->relationAs] ??= $whereFunc == 'firstWhere' ? null : [];
+                    
+                    if($model instanceof \Illuminate\Database\Eloquent\Model) {
+                        $related ??= $whereFunc == 'firstWhere' ? null : collect();
+                        $model->setRelation($this->relationAs, $related);
+                    } else {
+                        $related ??= $whereFunc == 'firstWhere' ? null : [];
+                        data_set($model, $this->relationAs, $related);
+                    }
+
                     return $model;
                 }
             }
             $related = $results->$whereFunc(function($related) use($model) {
                 foreach($this->keys as $relatedKey => $key) {
                     if(is_array($key)) {
-                        $modelKeys = array_map(fn($k) => $k instanceof Expression ? strtolower(json_decode($k->getValue($this->query->getGrammar()))) : strtolower(Arr::get($model, $k)), $key);
+                        $modelKeys = array_map(fn($k) => $k instanceof Expression ? strtolower(json_decode($k->getValue($this->query->getGrammar()))) : strtolower(data_get($model, $k)), $key);
                         $relatedKey = str_replace($related->getTable().'.', '', $relatedKey);
                         if(!in_array(strtolower($related->$relatedKey), $modelKeys)) {
                             return false;
@@ -178,7 +186,7 @@ class LazyLoader
                     if($key instanceof Expression) {
                         continue;
                     }
-                    $modelKey = Arr::get($model, $key);
+                    $modelKey = data_get($model, $key);
                     $relatedKey = str_replace($related->getTable().'.', '', $relatedKey);
                     if(strcasecmp($modelKey, $related->$relatedKey) !== 0) {
                         return false;
@@ -186,7 +194,13 @@ class LazyLoader
                 }
                 return true;
             });
-            $model[$this->relationAs] = $this->asArray ? $related?->toArray() : $related;
+            
+            if($model instanceof \Illuminate\Database\Eloquent\Model) {
+                $model->setRelation($this->relationAs, $this->asArray ? $related?->toArray() : $related);
+            } else {
+                data_set($model, $this->relationAs, $this->asArray ? $related?->toArray() : $related);
+            }
+
             return $model;
         });
     }
